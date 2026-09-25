@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "gameinfo",
+  "version": "${version}",
+  "name": "GameInfo",
+  "description": "Gameinfo for 26.3",
+  "authors": ["Coda_R5"],
+  "contributors": [
+    "ifcifc(OriginalAuthor)",
+    "chenjl_117(MonitorByDP)"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/gameinfo-unofficial-port",
+    "issues": "https://github.com/CodaR5/issusbygiforeveryone/issues"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/gameinfo/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.codar5.gameinfo.GameinfoClient"
+    ],
+    "main": [
+      "com.codar5.gameinfo.Gameinfo"
+    ],
+    "modmenu": [
+      "com.codar5.gameinfo.gui.ModMenuIntegration"
+    ],
+    "preLaunch": [
+      "com.codar5.gameinfo.Gameinfo"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
