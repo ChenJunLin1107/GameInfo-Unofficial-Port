@@ -1,12 +1,16 @@
+/**
+ *认准作者Coda_R5，谁敢冒充我我打死他。
+ */
 package com.codar5.gameinfo.hud;
 
 import com.codar5.gameinfo.GameinfoClient;
 import com.codar5.gameinfo.config.GameInfoConfig;
 import com.codar5.gameinfo.renderer.FurnaceDataCache;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import com.codar5.gameinfo.util.SlimeChunkUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.SharedConstants;
@@ -42,7 +46,10 @@ public class HudOverlay implements HudElement {
     static int color = DEFAULT_COLOR;
     static GameInfoConfig config;
 
+    private static final int SLIME_CHUNK_COLOR = 0xFF55FF55;
+
     public static final ConcurrentHashMap<BlockPos, ItemStack[]> serverFurnaceCache = new ConcurrentHashMap<>();
+    public static final Map<Long, Boolean> slimeChunkCache = new HashMap<>();
 
     public HudOverlay() {
         client = Minecraft.getInstance();
@@ -89,7 +96,6 @@ public class HudOverlay implements HudElement {
 
         yPos += renderFPS(drawContext, xPos, yPos);
         yPos += renderTimeAndDays(drawContext, xPos, yPos);
-        yPos += renderRealTime(drawContext, xPos, yPos);
         yPos += renderCoordinates(drawContext, xPos, yPos);
         yPos += renderNetherCoordinates(drawContext, xPos, yPos);
         yPos += renderBiome(drawContext, xPos, yPos);
@@ -305,36 +311,34 @@ public class HudOverlay implements HudElement {
         int width = textRenderer.width(xyzLabel);
         String xyz = String.format("%d %d %d - %s", pos.getX(), pos.getY(), pos.getZ(), directionString);
         drawContext.text(textRenderer, Component.literal(xyz), x + width, y, getDefaultColor(), true);
+
+        if (config.showSlimeChunk && isSlimeChunk(pos)) {
+            int xyzWidth = textRenderer.width(xyz);
+            Component slimeText = Component.literal(" - ").append(Component.translatable("gameinfo.hud.slime_chunk"));
+            drawContext.text(textRenderer, slimeText, x + width + xyzWidth, y, SLIME_CHUNK_COLOR, true);
+        }
+
         return DEFAULT_HEIGHT;
     }
 
-    private int renderRealTime(GuiGraphicsExtractor drawContext, int x, int y) {
-        if (!config.showRealTime) return 0;
-        LocalDateTime now = LocalDateTime.now();
-        Component weekDayText = getWeekDayComponent(now);
-        Component labelText = Component.translatable("gameinfo.hud.real_time");
-        drawContext.text(textRenderer, labelText, x, y, getMainColor(), true);
+    private boolean isSlimeChunk(BlockPos pos) {
+        if (client.level == null) return false;
+        if (!client.level.dimension().equals(Level.OVERWORLD)) return false;
 
-        int labelWidth = textRenderer.width(labelText);
-        String dateText = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        drawContext.text(textRenderer, Component.literal(dateText), x + labelWidth, y, getDefaultColor(), true);
+        int chunkX = pos.getX() >> 4;
+        int chunkZ = pos.getZ() >> 4;
+        long chunkKey = ((long) chunkX & 0xFFFFFFFFL) | (((long) chunkZ & 0xFFFFFFFFL) << 32);
 
-        Component timeText = Component.literal(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " ").copy().append(weekDayText);
-        drawContext.text(textRenderer, timeText, x, y + DEFAULT_HEIGHT, getDefaultColor(), true);
-        return DEFAULT_HEIGHT * 2;
-    }
+        if (client.hasSingleplayerServer()) {
+            var server = client.getSingleplayerServer();
+            if (server != null) {
+                long seed = server.overworld().getSeed();
+                if (seed == 0L) return false;
+                return SlimeChunkUtil.isSlimeChunk(seed, chunkX, chunkZ);
+            }
+        }
 
-    private Component getWeekDayComponent(LocalDateTime now) {
-        String key = switch (now.getDayOfWeek().getValue()) {
-            case 1 -> "gameinfo.weekday.monday";
-            case 2 -> "gameinfo.weekday.tuesday";
-            case 3 -> "gameinfo.weekday.wednesday";
-            case 4 -> "gameinfo.weekday.thursday";
-            case 5 -> "gameinfo.weekday.friday";
-            case 6 -> "gameinfo.weekday.saturday";
-            default -> "gameinfo.weekday.sunday";
-        };
-        return Component.translatable(key);
+        return slimeChunkCache.getOrDefault(chunkKey, false);
     }
 
     private int renderNetherCoordinates(GuiGraphicsExtractor drawContext, int x, int y) {
@@ -345,13 +349,18 @@ public class HudOverlay implements HudElement {
         BlockPos pos = player.blockPosition();
 
         String coordinateText = "";
-        if (world.dimension().identifier().equals(Level.OVERWORLD.identifier())) {
+        String labelKey = "";
+        if (world.dimension().equals(Level.OVERWORLD)) {
             coordinateText = String.format("%d %d", pos.getX() / 8, pos.getZ() / 8);
-        } else if (world.dimension().identifier().equals(Level.NETHER.identifier())) {
+            labelKey = "gameinfo.hud.nether";
+        } else if (world.dimension().equals(Level.NETHER)) {
             coordinateText = String.format("%d %d", pos.getX() * 8, pos.getZ() * 8);
+            labelKey = "gameinfo.hud.overworld";
+        } else {
+            return 0;
         }
 
-        Component coordinateLabel = Component.translatable("gameinfo.hud.nether");
+        Component coordinateLabel = Component.translatable(labelKey);
         drawContext.text(textRenderer, coordinateLabel, x, y, getMainColor(), true);
         int width = textRenderer.width(coordinateLabel);
         drawContext.text(textRenderer, Component.literal(coordinateText), x + width, y, getDefaultColor(), true);
