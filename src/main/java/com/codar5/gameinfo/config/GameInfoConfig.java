@@ -12,7 +12,7 @@ import net.minecraft.util.CommonColors;
 public class GameInfoConfig {
     public boolean showFPS = true;
     public boolean showTimeAndDays = true;
-    public boolean showRealTime = false;
+    public boolean showSlimeChunk = true;
     public boolean showCoordinates = true;
     public boolean showNetherCoordinates = true;
     public boolean showBiome = true;
@@ -35,7 +35,7 @@ public class GameInfoConfig {
     public void copyFrom(GameInfoConfig other) {
         this.showFPS = other.showFPS;
         this.showTimeAndDays = other.showTimeAndDays;
-        this.showRealTime = other.showRealTime;
+        this.showSlimeChunk = other.showSlimeChunk;
         this.showCoordinates = other.showCoordinates;
         this.showNetherCoordinates = other.showNetherCoordinates;
         this.showBiome = other.showBiome;
@@ -55,7 +55,7 @@ public class GameInfoConfig {
         if (flag) {
             showFPS = false;
             showTimeAndDays = false;
-            showRealTime = false;
+            showSlimeChunk = false;
             showCoordinates = false;
             showNetherCoordinates = false;
             showBiome = false;
@@ -80,7 +80,7 @@ public class GameInfoConfig {
             properties.load(input);
             showFPS = Boolean.parseBoolean(properties.getProperty("showFPS", "true"));
             showTimeAndDays = Boolean.parseBoolean(properties.getProperty("showTimeAndDays", "true"));
-            showRealTime = Boolean.parseBoolean(properties.getProperty("showRealTime", "false"));
+            showSlimeChunk = Boolean.parseBoolean(properties.getProperty("showSlimeChunk", "true"));
             showCoordinates = Boolean.parseBoolean(properties.getProperty("showCoordinates", "true"));
             showNetherCoordinates = Boolean.parseBoolean(properties.getProperty("showNetherCoordinates", "true"));
             showBiome = Boolean.parseBoolean(properties.getProperty("showBiome", "true"));
@@ -103,7 +103,7 @@ public class GameInfoConfig {
         Properties properties = new Properties();
         properties.setProperty("showFPS", Boolean.toString(showFPS));
         properties.setProperty("showTimeAndDays", Boolean.toString(showTimeAndDays));
-        properties.setProperty("showRealTime", Boolean.toString(showRealTime));
+        properties.setProperty("showSlimeChunk", Boolean.toString(showSlimeChunk));
         properties.setProperty("showCoordinates", Boolean.toString(showCoordinates));
         properties.setProperty("showNetherCoordinates", Boolean.toString(showNetherCoordinates));
         properties.setProperty("showBiome", Boolean.toString(showBiome));

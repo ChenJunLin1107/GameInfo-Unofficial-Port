@@ -1,72 +1,42 @@
 package com.codar5.gameinfo.command;
 
+import com.codar5.gameinfo.config.GameInfoConfig;
 import com.codar5.gameinfo.GameInfoNeoForge;
-import com.codar5.gameinfo.util.HexUtil;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.minecraft.network.chat.Component;
 
-@EventBusSubscriber(modid = GameInfoNeoForge.MOD_ID)
 public class GameInfoCommand {
-
-    @SubscribeEvent
-    public static void registerCommands(RegisterCommandsEvent event) {
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("gameinfo");
-
-        addBoolean(root, "fps", v -> GameInfoNeoForge.config.showFPS = v);
-        addBoolean(root, "time", v -> GameInfoNeoForge.config.showTimeAndDays = v);
-        addBoolean(root, "coords", v -> GameInfoNeoForge.config.showCoordinates = v);
-        addBoolean(root, "nether", v -> GameInfoNeoForge.config.showNetherCoordinates = v);
-        addBoolean(root, "biome", v -> GameInfoNeoForge.config.showBiome = v);
-        addBoolean(root, "remark", v -> GameInfoNeoForge.config.remark = v);
-        addBoolean(root, "enable", v -> GameInfoNeoForge.config.enabled = v);
-
-        addInteger(root, "xpos", v -> GameInfoNeoForge.config.xPos = v);
-        addInteger(root, "ypos", v -> GameInfoNeoForge.config.yPos = v);
-
-        addColor(root, "color");
-
-        dispatcher.register(root);
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("gameinfo")
+                .then(Commands.literal("fps").executes(ctx -> toggle(ctx, "fps")))
+                .then(Commands.literal("time").executes(ctx -> toggle(ctx, "time")))
+                .then(Commands.literal("coordinates").executes(ctx -> toggle(ctx, "coordinates")))
+                .then(Commands.literal("nether").executes(ctx -> toggle(ctx, "nether")))
+                .then(Commands.literal("biome").executes(ctx -> toggle(ctx, "biome")))
+                .then(Commands.literal("equipment").executes(ctx -> toggle(ctx, "equipment")))
+                .then(Commands.literal("slime").executes(ctx -> toggle(ctx, "slime")))
+                .executes(ctx -> {
+                    ctx.getSource().sendSuccess(() -> Component.literal("§aGameInfo Commands: fps, time, coordinates, nether, biome, equipment, slime"), false);
+                    return 1;
+                })
+        );
     }
 
-    private static void addBoolean(LiteralArgumentBuilder<CommandSourceStack> root, String name, Consumer<Boolean> setter) {
-        root.then(Commands.literal(name)
-                .then(Commands.argument("state", BoolArgumentType.bool())
-                        .executes(ctx -> {
-                            setter.accept(BoolArgumentType.getBool(ctx, "state"));
-                            GameInfoNeoForge.config.saveConfig();
-                            return 1;
-                        })));
-    }
-
-    private static void addInteger(LiteralArgumentBuilder<CommandSourceStack> root, String name, IntConsumer setter) {
-        root.then(Commands.literal(name)
-                .then(Commands.argument("position", IntegerArgumentType.integer())
-                        .executes(ctx -> {
-                            setter.accept(IntegerArgumentType.getInteger(ctx, "position"));
-                            GameInfoNeoForge.config.saveConfig();
-                            return 1;
-                        })));
-    }
-
-    private static void addColor(LiteralArgumentBuilder<CommandSourceStack> root, String name) {
-        root.then(Commands.literal(name)
-                .then(Commands.argument("color", StringArgumentType.string())
-                        .executes(ctx -> {
-                            String color = StringArgumentType.getString(ctx, "color");
-                            GameInfoNeoForge.config.color = HexUtil.toDecimal("0xFF" + color);
-                            GameInfoNeoForge.config.saveConfig();
-                            return 1;
-                        })));
+    private static int toggle(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String type) {
+        GameInfoConfig config = GameInfoNeoForge.config;
+        switch (type) {
+            case "fps": config.showFPS = !config.showFPS; break;
+            case "time": config.showTimeAndDays = !config.showTimeAndDays; break;
+            case "coordinates": config.showCoordinates = !config.showCoordinates; break;
+            case "nether": config.showNetherCoordinates = !config.showNetherCoordinates; break;
+            case "biome": config.showBiome = !config.showBiome; break;
+            case "equipment": config.showEquipment = !config.showEquipment; break;
+            case "slime": config.showSlimeChunk = !config.showSlimeChunk; break;
+        }
+        config.saveConfig();
+        ctx.getSource().sendSuccess(() -> Component.literal("§aToggled " + type), false);
+        return 1;
     }
 }

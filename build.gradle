@@ -12,100 +12,55 @@ tasks.named('wrapper', Wrapper).configure {
 version = mod_version
 group = mod_group_id
 
+repositories {
+    mavenCentral()
+    maven {
+        name = "NeoForged"
+        url = "https://maven.neoforged.net/releases"
+    }
+    maven {
+        name = "Minecraft"
+        url = "https://libraries.minecraft.net/"
+    }
+}
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
     exclude("**/*.bbmodel")
     exclude("src/generated/**/.cache")
 }
 
-repositories.clear()
-repositories {
-    maven {
-        name = "lss233-mirror"
-        url = "https://lss233.littleservice.cn/repositories/minecraft"
-    }
-    maven {
-        name = "aliyun-public"
-        url = "https://maven.aliyun.com/repository/public"
-    }
-    maven {
-        name = "neoforged-forgecdn"
-        url = "https://neoforged.forgecdn.net/releases"
-    }
-    maven {
-        name = "neoforged-forgecdn-mojang-meta"
-        url = "https://neoforged.forgecdn.net/mojang-meta"
-    }
-    maven {
-        name = "libraries.minecraft.net"
-        url = "https://libraries.minecraft.net/"
-    }
-}
-
 base {
-    archivesName = mod_id
+    archivesName = "GameInfo-${minecraft_version}-NeoForge"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+tasks.named('jar', Jar).configure {
+    archiveVersion = mod_version
+    archiveClassifier = ""
+}
 
 neoForge {
     version = project.neo_version
-
     runs {
-        client {
-            client()
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        server {
-            server()
-            programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        gameTestServer {
-            type = "gameTestServer"
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
+        client { client() }
+        server { server(); programArgument '--nogui' }
         data {
             clientData()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
-
-        configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
     }
-
-    mods {
-        "${mod_id}" {
-            sourceSet(sourceSets.main)
-        }
-    }
+    mods { "${mod_id}" { sourceSet(sourceSets.main) } }
 }
 
-configurations {
-    runtimeClasspath.extendsFrom localRuntime
-}
-
-dependencies {
-}
+configurations { runtimeClasspath.extendsFrom localRuntime }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
-            minecraft_version      : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            neo_version            : neo_version,
-            neo_version_range      : neo_version_range,
-            loader_version_range   : loader_version_range,
-            mod_id                 : mod_id,
-            mod_name               : mod_name,
-            mod_license            : mod_license,
-            mod_version            : mod_version,
-            mod_authors            : mod_authors,
-            mod_description        : mod_description,
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            neo_version: neo_version, neo_version_range: neo_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license,
+            mod_version: mod_version, mod_authors: mod_authors, mod_description: mod_description,
     ]
     inputs.properties replaceProperties
     expand replaceProperties
@@ -115,26 +70,4 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/repo"
-        }
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-idea {
-    module {
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

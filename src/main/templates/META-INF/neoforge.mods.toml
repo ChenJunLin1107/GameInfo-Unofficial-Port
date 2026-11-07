@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
-issueTrackerURL="https://github.com/CodaR5/issusbygiforeveryone/issues"
+issueTrackerURL="https://github.com/CodaR5/gameinfo/issues"
 
 [[mods]]
 modId = "${mod_id}"
@@ -9,7 +9,6 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 displayURL="https://modrinth.com/mod/gameinfo"
 logoFile="logo.png"
-credits="ifcifc(OriginalAuthor) and chenjl_117(MonitorByDP)"
 authors = "${mod_authors}"
 description = '''${mod_description}'''
 
