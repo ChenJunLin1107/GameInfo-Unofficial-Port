@@ -3,17 +3,14 @@
   "id": "gameinfo",
   "version": "${version}",
   "name": "GameInfo",
-  "description": "Gameinfo for 26.3",
-  "authors": ["Coda_R5"],
-  "contributors": [
-    "ifcifc(OriginalAuthor)",
-    "chenjl_117(MonitorByDP)"
-  ],
+  "description": "Gameinfo for ${minecraft_version}",
+  "authors": ["ifcifc","Coda_R5","chenjl_117"],
   "contact": {
-    "homepage": "https://modrinth.com/mod/gameinfo-unofficial-port",
-    "issues": "https://github.com/CodaR5/issusbygiforeveryone/issues"
+    "homepage": "https://modrinth.com/mod/gameinfo",
+    "sources": "https://github.com/CodaR5/gameinfo",
+    "issues": "https://github.com/CodaR5/gameinfo/issues"
   },
-  "license": "All-Rights-Reserved",
+  "license": "LGPL-3.0-or-later",
   "icon": "assets/gameinfo/icon.png",
   "environment": "*",
   "entrypoints": {

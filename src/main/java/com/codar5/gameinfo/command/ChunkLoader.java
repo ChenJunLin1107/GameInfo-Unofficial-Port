@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,7 +26,6 @@ public class ChunkLoader implements CommandRegistrationCallback {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandRegistryAccess, Commands.CommandSelection registrationEnvironment) {
         commandDispatcher.register(Commands.literal("chunk")
-//                .requires(source -> source.hasper(2))
                 .then(Commands.literal("load")
                         .executes(this::loadChunk))
                 .then(Commands.literal("unload")
@@ -35,9 +35,9 @@ public class ChunkLoader implements CommandRegistrationCallback {
                 .then(Commands.literal("check")
                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                 .then(Commands.argument("z", IntegerArgumentType.integer())
-                                        .executes(this::checkChunk)))));
+                                        .executes(this::checkChunk))))
+        );
     }
-
 
     private int loadChunk(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
@@ -48,7 +48,6 @@ public class ChunkLoader implements CommandRegistrationCallback {
 
         loadedChunks.computeIfAbsent(worldKey, k -> new HashSet<>()).add(chunkPos);
 
-        // 强制加载区块
         world.getChunkSource().updateChunkForced(chunkPos, true);
 
         source.sendSuccess(() -> Component.literal(
@@ -69,7 +68,6 @@ public class ChunkLoader implements CommandRegistrationCallback {
 
         Set<ChunkPos> chunks = loadedChunks.get(worldKey);
         if (chunks != null && chunks.remove(chunkPos)) {
-            // 取消强制加载
             world.getChunkSource().updateChunkForced(chunkPos, false);
             source.sendSuccess(() -> Component.literal(
                             String.format("§c已取消加载区块 [%d, %d] 在世界 %s",
@@ -148,13 +146,10 @@ public class ChunkLoader implements CommandRegistrationCallback {
                     false);
         }
 
-
         return 1;
     }
 
     private String getWorldKey(Level world) {
         return world.dimension().identifier().toString();
     }
-
-
 }
