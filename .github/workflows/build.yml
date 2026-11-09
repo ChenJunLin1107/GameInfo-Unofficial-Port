@@ -6,11 +6,13 @@ on:
       - "26.2-Fabric"
       - "26.3-Fabric"
       - "26.3-Neoforge"
+      - "26.4-snapshot"
   pull_request:
     branches: 
       - "26.2-Fabric"
       - "26.3-Fabric"
       - "26.3-Neoforge"
+      - "26.4-snapshot"
 jobs:
   build:
     runs-on: ubuntu-latest
