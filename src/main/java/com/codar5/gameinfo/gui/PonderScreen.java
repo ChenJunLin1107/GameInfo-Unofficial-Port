@@ -7,18 +7,17 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * 思索展示界面。
- * 带有从底部快速平滑升起的页面弹出动画，并动态适配按钮文本。
+ * 带有从底部快速平滑升起的页面弹出动画，并适配最新版 API 签名。
  */
 public class PonderScreen extends Screen {
     private final Screen parent;
     private final PonderTopic topic;
     private int currentPage = 0;
-
+    
     private ItemStack cachedIcon = null;
     private Button actionButton;
 
@@ -36,7 +35,7 @@ public class PonderScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-
+        
         try {
             this.cachedIcon = new ItemStack(this.topic.icon);
         } catch (Exception ignored) {
@@ -52,9 +51,9 @@ public class PonderScreen extends Screen {
                 this.onClose();
             }
         }).bounds(this.width / 3 + 40, this.height - 40, 120, 20).build();
-
+        
         this.addRenderableWidget(this.actionButton);
-
+        
         // 初始化按钮文本
         updateButtonText();
     }
@@ -74,11 +73,14 @@ public class PonderScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context) {
         // 1. 计算动画真实流逝时间
         long elapsed = System.currentTimeMillis() - this.startTime;
-        float rawProgress = Mth.clamp((float) elapsed / ANIM_DURATION, 0.0f, 1.0f);
-
+        
+        // 手动实现 clamp 逻辑，避免不同版本 Mth 类方法找不到的问题
+        float rawProgress = (float) elapsed / ANIM_DURATION;
+        rawProgress = Math.max(0.0f, Math.min(1.0f, rawProgress));
+        
         // 2. Ease-Out-Cubic 缓动曲线
         float ease = 1.0f - (float) Math.pow(1.0f - rawProgress, 3);
 
@@ -124,14 +126,18 @@ public class PonderScreen extends Screen {
         // 绘制右侧说明文字
         int textX = splitPoint + 40;
         int textY = 60;
-
+        
         int descAlpha = (int) (255 * ease);
         context.text(this.font, Component.translatable("ponder.gameinfo.ui.description"), textX, textY, (descAlpha << 24) | 0xAAAAAA, true);
         textY += 25;
 
         for (int i = 0; i <= currentPage; i++) {
             if (i < this.topic.description.size()) {
-                float lineEase = 1.0f - (float) Math.pow(1.0f - Mth.clamp((rawProgress - i * 0.05f) / 0.8f, 0.0f, 1.0f), 3);
+                // 文字逐行淡入并轻微上浮
+                float lineProgress = (rawProgress - i * 0.05f) / 0.8f;
+                lineProgress = Math.max(0.0f, Math.min(1.0f, lineProgress));
+                float lineEase = 1.0f - (float) Math.pow(1.0f - lineProgress, 3);
+                
                 int lineColor = ((int) (255 * lineEase) << 24) | 0xFFFFFF;
                 if (lineEase > 0) {
                     context.text(this.font, this.topic.description.get(i), textX, (int)(textY + (1.0f - lineEase) * 20.0f), lineColor, true);
@@ -140,12 +146,10 @@ public class PonderScreen extends Screen {
             }
         }
 
-        // 文本逻辑已完全交由 updateButtonText() 处理
-
         poseStack.popMatrix();
 
-        // 渲染原版 Button 控件
-        super.extractRenderState(context, mouseX, mouseY, delta);
+        // 渲染原版 Button 控件（单参数调用）
+        super.extractRenderState(context);
     }
 
     @Override
