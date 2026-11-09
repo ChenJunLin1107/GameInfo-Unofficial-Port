@@ -1,6 +1,3 @@
-/**
- *认准作者Coda_R5，谁敢冒充我我打死他。
- */
 package com.codar5.gameinfo;
 
 import com.codar5.gameinfo.network.FurnaceDataPayload;
@@ -9,10 +6,10 @@ import com.codar5.gameinfo.network.SlimeChunkSyncPayload;
 import com.codar5.gameinfo.util.SlimeChunkUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -25,8 +22,6 @@ public class Gameinfo implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
                 if (!(sp.level() instanceof ServerLevel level)) continue;
-
-                if (!level.dimension().equals(Level.OVERWORLD)) continue;
 
                 BlockPos center = sp.blockPosition();
                 BlockPos min = center.offset(-6, -3, -6);

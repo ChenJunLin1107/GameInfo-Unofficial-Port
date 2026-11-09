@@ -1,6 +1,3 @@
-/**
- *认准作者Coda_R5，谁敢冒充我我打死他。
- */
 package com.codar5.gameinfo.hud;
 
 import com.codar5.gameinfo.GameinfoClient;
@@ -14,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -78,7 +74,7 @@ public class HudOverlay implements HudElement {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor drawContext, DeltaTracker tickCounter) {
+    public void extractRenderState(GuiGraphicsExtractor drawContext) {
         if (textRenderer == null) {
             textRenderer = client.font;
             if (textRenderer == null) {

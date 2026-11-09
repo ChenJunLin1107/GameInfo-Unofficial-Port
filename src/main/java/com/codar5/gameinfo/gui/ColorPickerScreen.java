@@ -1,6 +1,3 @@
-/**
- *认准作者Coda_R5，谁敢冒充我我打死他。
- */
 package com.codar5.gameinfo.gui;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -112,9 +109,9 @@ public class ColorPickerScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context) {
         context.fill(0, 0, this.width, this.height, 0x80000000);
-        super.extractRenderState(context, mouseX, mouseY, delta);
+        super.extractRenderState(context);
 
         context.centeredText(this.font, this.title, this.width / 2, 20, 0xFFFFD700);
         context.centeredText(this.font, Component.translatable("gameinfo.color_picker.presets"), this.width / 2, 35, CommonColors.WHITE);
@@ -165,7 +162,7 @@ public class ColorPickerScreen extends Screen {
         }
 
         @Override
-        protected void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
+        protected void extractContents(GuiGraphicsExtractor context) {
             context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, this.color);
 
             if (this.isHovered()) {
