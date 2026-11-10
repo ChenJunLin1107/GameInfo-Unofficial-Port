@@ -51,13 +51,15 @@ public class SeedCommand implements ClientCommandRegistrationCallback {
 
     /**
      * 发送反馈消息。
-     * 由于 26.4-snapshot 移除了 SharedSuggestionProvider 和 displayClientMessage 方法，
-     * 这里直接通过 Minecraft 客户端的 Chat 组件向玩家发送系统消息，完美绕过该问题。
+     * 由于 26.4-snapshot 移除了 Gui.getChat() 和 displayClientMessage，
+     * 这里使用 Player.sendSystemMessage()，这是最底层且最稳定的系统消息发送方式。
      *
      * @param message 反馈文本内容
      */
     private static void feedback(String message) {
         Minecraft mc = Minecraft.getInstance();
-        mc.gui.getChat().addMessage(Component.literal(message));
+        if (mc.player != null) {
+            mc.player.sendSystemMessage(Component.literal(message));
+        }
     }
 }
