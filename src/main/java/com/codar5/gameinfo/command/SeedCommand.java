@@ -27,22 +27,22 @@ public class SeedCommand implements ClientCommandRegistrationCallback {
                                 .executes(context -> {
                                     long seed = LongArgumentType.getLong(context, "seed");
                                     WorldSeedStore.setManual(seed);
-                                    feedback(context.getSource(), "Gameinfo: slime-chunk seed " + seed + " saved for this server");
+                                    feedback("Gameinfo: slime-chunk seed " + seed + " saved for this server");
                                     return 1;
                                 })))
                 .then(ClientCommands.literal("clear")
                         .executes(context -> {
                             WorldSeedStore.clearManual();
-                            feedback(context.getSource(), "Gameinfo: saved seed cleared for this server");
+                            feedback("Gameinfo: saved seed cleared for this server");
                             return 1;
                         }))
                 .then(ClientCommands.literal("show")
                         .executes(context -> {
                             long seed = WorldSeedStore.resolve();
                             if (seed == 0L) {
-                                feedback(context.getSource(), "Gameinfo: no seed known for this server (overlay stays off)");
+                                feedback("Gameinfo: no seed known for this server (overlay stays off)");
                             } else {
-                                feedback(context.getSource(), "Gameinfo: using slime-chunk seed " + seed);
+                                feedback("Gameinfo: using slime-chunk seed " + seed);
                             }
                             return 1;
                         }))
@@ -51,16 +51,13 @@ public class SeedCommand implements ClientCommandRegistrationCallback {
 
     /**
      * 发送反馈消息。
-     * 由于 26.4-snapshot 移除了 SharedSuggestionProvider 类，导致 sendFeedback 报错，
-     * 这里直接通过 Minecraft 客户端实例向玩家发送系统消息，完美绕过该问题。
+     * 由于 26.4-snapshot 移除了 SharedSuggestionProvider 和 displayClientMessage 方法，
+     * 这里直接通过 Minecraft 客户端的 Chat 组件向玩家发送系统消息，完美绕过该问题。
      *
-     * @param source 命令源上下文
      * @param message 反馈文本内容
      */
-    private static void feedback(FabricClientCommandSource source, String message) {
+    private static void feedback(String message) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null) {
-            mc.player.displayClientMessage(Component.literal(message), false);
-        }
+        mc.gui.getChat().addMessage(Component.literal(message));
     }
 }
