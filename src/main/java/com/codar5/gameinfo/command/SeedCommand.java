@@ -1,3 +1,6 @@
+/**
+ *认准作者Coda_R5，谁敢冒充我我打死他。
+ */
 package com.codar5.gameinfo.command;
 
 import com.codar5.gameinfo.network.WorldSeedStore;
@@ -6,12 +9,18 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 
+/**
+ * 客户端种子指令注册类。
+ * 提供 /giseed 指令，用于在纯客户端环境下设置和查看当前服务器的种子。
+ */
 public class SeedCommand implements ClientCommandRegistrationCallback {
 
     @Override
-    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, net.minecraft.commands.CommandBuildContext buildContext) {
+    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext buildContext) {
         dispatcher.register(ClientCommands.literal("giseed")
                 .then(ClientCommands.literal("set")
                         .then(ClientCommands.argument("seed", LongArgumentType.longArg())
@@ -40,7 +49,18 @@ public class SeedCommand implements ClientCommandRegistrationCallback {
         );
     }
 
+    /**
+     * 发送反馈消息。
+     * 由于 26.4-snapshot 移除了 SharedSuggestionProvider 类，导致 sendFeedback 报错，
+     * 这里直接通过 Minecraft 客户端实例向玩家发送系统消息，完美绕过该问题。
+     *
+     * @param source 命令源上下文
+     * @param message 反馈文本内容
+     */
     private static void feedback(FabricClientCommandSource source, String message) {
-        source.sendFeedback(Component.literal(message));
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            mc.player.displayClientMessage(Component.literal(message), false);
+        }
     }
 }
