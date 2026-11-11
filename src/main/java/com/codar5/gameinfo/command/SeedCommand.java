@@ -5,7 +5,7 @@ package com.codar5.gameinfo.command;
 
 import com.codar5.gameinfo.network.WorldSeedStore;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -23,11 +23,16 @@ public class SeedCommand implements ClientCommandRegistrationCallback {
     public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext buildContext) {
         dispatcher.register(ClientCommands.literal("giseed")
                 .then(ClientCommands.literal("set")
-                        .then(ClientCommands.argument("seed", LongArgumentType.longArg())
+                        .then(ClientCommands.argument("seed", StringArgumentType.word())
                                 .executes(context -> {
-                                    long seed = LongArgumentType.getLong(context, "seed");
-                                    WorldSeedStore.setManual(seed);
-                                    feedback("Gameinfo: slime-chunk seed " + seed + " saved for this server");
+                                    String seedStr = StringArgumentType.getString(context, "seed");
+                                    try {
+                                        long seed = Long.parseLong(seedStr);
+                                        WorldSeedStore.setManual(seed);
+                                        feedback("Gameinfo: slime-chunk seed " + seed + " saved for this server");
+                                    } catch (NumberFormatException e) {
+                                        feedback("§cGameinfo: Invalid seed format!");
+                                    }
                                     return 1;
                                 })))
                 .then(ClientCommands.literal("clear")
@@ -51,8 +56,7 @@ public class SeedCommand implements ClientCommandRegistrationCallback {
 
     /**
      * 发送反馈消息。
-     * 由于 26.4-snapshot 移除了 Gui.getChat() 和 displayClientMessage，
-     * 这里使用 Player.sendSystemMessage()，这是最底层且最稳定的系统消息发送方式。
+     * 使用 Player.sendSystemMessage() 是最稳定的系统消息发送方式。
      *
      * @param message 反馈文本内容
      */
