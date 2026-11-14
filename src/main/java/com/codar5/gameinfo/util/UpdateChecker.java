@@ -50,12 +50,12 @@ public class UpdateChecker {
             Gson gson = new Gson();
             JsonObject json = gson.fromJson(responseBody, JsonObject.class);
             
-            if (json.has("tag_name")) {
+            if (json != null && json.has("tag_name")) {
                 String latestVersion = json.get("tag_name").getAsString();
                 String htmlUrl = json.get("html_url").getAsString();
 
                 if (isNewerVersion(latestVersion, CURRENT_VERSION)) {
-                    String message = String.format("§e[GameInfo] §aA new update is available! §7Current: %s §7-> §aLatest: %s\n§bDownload: %s",
+                    String message = String.format("§e[GameInfo] §a发现新版本! §7当前: %s §7-> §a最新: %s\n§b下载链接: %s",
                             CURRENT_VERSION, latestVersion, htmlUrl);
                     
                     Minecraft.getInstance().execute(() -> {
