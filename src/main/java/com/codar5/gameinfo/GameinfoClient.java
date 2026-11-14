@@ -6,7 +6,6 @@ package com.codar5.gameinfo;
 import com.codar5.gameinfo.command.ChunkLoader;
 import com.codar5.gameinfo.command.GameInfoCommand;
 import com.codar5.gameinfo.command.SeedCommand;
-import com.codar5.gameinfo.command.SeedChatListener;
 import com.codar5.gameinfo.config.GameInfoConfig;
 import com.codar5.gameinfo.hud.BlockInfoHudRenderer;
 import com.codar5.gameinfo.hud.EntityHealthHudRenderer;
@@ -38,8 +37,6 @@ public class GameinfoClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(command);
         ClientCommandRegistrationCallback.EVENT.register(new SeedCommand());
         CommandRegistrationCallback.EVENT.register(chunkLoader);
-        
-        SeedChatListener.register();
         
         KeybindHandler.register();
 
