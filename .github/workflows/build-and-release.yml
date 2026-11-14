@@ -8,7 +8,7 @@ on:
       - "26.3-Neoforge"
       - "26.4-snapshot"
     tags:
-      - 'v*'
+      - 'v*'   # 只有推送 v 开头的 Tag 时，才会触发发布
   pull_request:
     branches:
       - "26.2-Fabric"
@@ -17,31 +17,38 @@ on:
       - "26.4-snapshot"
 
 permissions:
-  contents: write
+  contents: write # 发布 Release 必须要有写权限
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. 拉取代码
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 25
+      # 2. 设置 Java 环境
+      # 提示：如果你在 26.3-Neoforge 分支，且需要 JDK 21，请把下面的 '25' 改成 '21'
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
+      # 3. 配置 Gradle 缓存（加速构建）
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # 4. 赋予 gradlew 执行权限
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # 5. 执行构建与测试（如果测试失败，后续步骤会全部中止）
       - name: Build & Test
         run: ./gradlew build --no-daemon
 
+      # 6. 收集并过滤 jar 文件（排除 sources 和 dev 包）
       - name: Collect jars
         run: |
           mkdir -p dist
@@ -51,12 +58,10 @@ jobs:
             esac
             cp "$f" dist/
           done
-          echo "将要发布的文件:"
+          echo "---- 将要处理的文件 ----"
           ls -l dist
 
-                # 专门用于日常测试：把构建出的 jar 打包上传到 Actions 页面
-
-
+      # 7. 日常测试用：把构建产物上传到 Actions 页面供下载（保留 7 天）
       - name: Upload Artifact for Testing
         uses: actions/upload-artifact@v4
         with:
@@ -64,6 +69,7 @@ jobs:
           path: dist/*.jar
           retention-days: 7
 
+      # 8. 正式发布用：只有在推送 Tag（以 v 开头）时才执行
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v') 
         uses: softprops/action-gh-release@v2
