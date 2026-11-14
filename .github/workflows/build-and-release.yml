@@ -54,6 +54,16 @@ jobs:
           echo "将要发布的文件:"
           ls -l dist
 
+                # 专门用于日常测试：把构建出的 jar 打包上传到 Actions 页面
+
+
+      - name: Upload Artifact for Testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameInfo-Test-Build
+          path: dist/*.jar
+          retention-days: 7
+
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v') 
         uses: softprops/action-gh-release@v2
